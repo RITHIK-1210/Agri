@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>AgriValue AI — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil: #2E3B2A;
+    --leaf: #3F6B3F;
+    --leaf-deep: #294A2C;
+    --harvest: #D97F2E;
+    --harvest-deep: #B8611A;
+    --cream: #FDFCF8;
+    --line: #E2DFD3;
+    --ink: #24291F;
+    --ink-soft: #5B6355;
+    --sell: #C6501F;
+    --store: #2E6B8F;
+    --dry: #B8861A;
+    --process: #3F6B3F;
+    --bg: var(--cream);
+    --panel: #FFFFFF;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1B1F17;
+      --panel: #242A1F;
+      --ink: #EDEEE6;
+      --ink-soft: #A9B09C;
+      --line: #3A4033;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1B1F17;
+    --panel: #242A1F;
+    --ink: #EDEEE6;
+    --ink-soft: #A9B09C;
+    --line: #3A4033;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    min-height: 100%;
+  }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 0.7rem; }
+  .brand-mark {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--harvest), var(--leaf));
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Fraunces", serif; font-weight: 700; color: #fff; font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  h1 {
+    font-family: "Fraunces", serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    margin: 0;
+    line-height: 1.15;
+  }
+  .tagline { color: var(--ink-soft); font-size: 0.92rem; margin-top: 0.2rem; }
+  .header-controls { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .lang-toggle {
+    display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+    height: fit-content;
+  }
+  .lang-toggle button {
+    border: none; background: var(--panel); color: var(--ink-soft);
+    padding: 0.5rem 0.9rem; font-family: "Inter", sans-serif; font-size: 0.85rem;
+    font-weight: 600; cursor: pointer;
+  }
+  .lang-toggle button.active { background: var(--leaf); color: #fff; }
+
+  .reset-btn {
+    display: flex; align-items: center; gap: 0.4rem;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink-soft);
+    padding: 0.5rem 0.9rem; border-radius: 8px; font-family: "Inter", sans-serif;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; height: fit-content;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .reset-btn:hover { border-color: var(--harvest); color: var(--harvest-deep); }
+  .reset-btn svg { width: 14px; height: 14px; }
+
+  .mic-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--panel); color: var(--leaf-deep);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .mic-btn svg { width: 17px; height: 17px; }
+  .mic-btn:hover { border-color: var(--leaf); }
+  .mic-btn.listening {
+    background: var(--leaf); color: #fff;
+    animation: micPulse 1s ease-in-out infinite;
+  }
+  @keyframes micPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(63,107,63,0.45); }
+    50% { box-shadow: 0 0 0 8px rgba(63,107,63,0); }
+  }
+
+  .photo-block { margin-bottom: 1.3rem; }
+  .photo-dropzone {
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+    padding: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    cursor: pointer;
+    background: var(--bg);
+    transition: border-color 0.15s ease;
+    min-height: 56px;
+  }
+  .photo-dropzone:hover { border-color: var(--leaf); }
+  .photo-dropzone.analyzing { border-color: var(--harvest); }
+  .photo-thumb {
+    width: 44px; height: 44px; border-radius: 8px;
+    object-fit: cover; flex-shrink: 0; display: none;
+    border: 1px solid var(--line);
+  }
+  .photo-icon-default {
+    width: 44px; height: 44px; border-radius: 8px;
+    background: var(--panel); border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: var(--ink-soft);
+  }
+  .photo-icon-default svg { width: 20px; height: 20px; }
+  .photo-text-main { font-size: 0.85rem; font-weight: 600; }
+  .photo-text-sub { font-size: 0.78rem; color: var(--ink-soft); margin-top: 0.1rem; }
+  .spin {
+    width: 13px; height: 13px; border-radius: 50%;
+    border: 2px solid var(--line); border-top-color: var(--harvest);
+    display: inline-block; margin-right: 0.35rem; vertical-align: -2px;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .copy-btn {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink-soft);
+    padding: 0.5rem 0.85rem;
+    border-radius: 8px;
+    font-family: "Inter", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .copy-btn:hover { border-color: var(--harvest); color: var(--harvest-deep); }
+  .copy-btn svg { width: 14px; height: 14px; }
+
+  .accuracy-strip {
+    grid-column: 1 / -1;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    flex-wrap: wrap;
+  }
+  .accuracy-label { font-size: 0.82rem; font-weight: 700; color: var(--ink-soft); white-space: nowrap; }
+  .accuracy-track {
+    flex: 1; min-width: 160px; height: 8px; background: var(--bg);
+    border-radius: 999px; overflow: hidden; border: 1px solid var(--line);
+  }
+  .accuracy-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--harvest), var(--leaf));
+    transition: width 0.6s ease;
+  }
+  .accuracy-val { font-size: 0.9rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .accuracy-note { font-size: 0.76rem; color: var(--ink-soft); width: 100%; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+
+  .presets { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem; }
+  .presets button {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .presets button:hover { border-color: var(--leaf); }
+  .presets button.active { background: var(--leaf); color: #fff; border-color: var(--leaf); }
+
+  .hint {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin: -0.6rem 0 1rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 0.35rem;
+  }
+  .field { margin-bottom: 1.1rem; }
+  select, input[type="number"] {
+    width: 100%;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", sans-serif;
+    font-size: 0.95rem;
+  }
+  .range-row { display: flex; align-items: center; gap: 0.75rem; }
+  input[type="range"] { flex: 1; accent-color: var(--leaf); }
+  .range-val { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 3.2em; text-align: right; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .result-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+  .result-icon-wrap {
+    width: 52px; height: 52px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.3s ease;
+  }
+  .result-icon-wrap svg { width: 28px; height: 28px; }
+  .result-action {
+    font-family: "Fraunces", serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin: 0;
+    opacity: 0;
+    transform: translateY(4px);
+    animation: riseIn 0.4s ease forwards;
+  }
+  .confidence-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.75rem; font-weight: 700;
+    padding: 0.25rem 0.6rem; border-radius: 999px;
+    background: var(--bg); border: 1px solid var(--line);
+    color: var(--ink-soft);
+    white-space: nowrap;
+    margin-top: 0.2rem;
+  }
+  .confidence-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-sub { color: var(--ink-soft); font-size: 0.9rem; margin: 0.5rem 0 1.3rem; }
+
+  .bars { display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.4rem; }
+  .bar-row { display: grid; grid-template-columns: 22px 78px 1fr 42px; align-items: center; gap: 0.5rem; }
+  .bar-icon { width: 16px; height: 16px; opacity: 0.75; }
+  .bar-label { font-size: 0.85rem; font-weight: 600; }
+  .bar-track { height: 9px; background: var(--bg); border-radius: 999px; overflow: hidden; border: 1px solid var(--line); }
+  .bar-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease; }
+  .bar-pct { font-size: 0.8rem; color: var(--ink-soft); text-align: right; font-variant-numeric: tabular-nums; }
+
+  .reasons { list-style: none; padding: 0; margin: 0 0 1.4rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .reasons li {
+    font-size: 0.88rem;
+    padding-left: 1.1rem;
+    position: relative;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .reasons li::before {
+    content: "";
+    position: absolute; left: 0; top: 0.45em;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--leaf);
+  }
+
+  .partner-card {
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+    background: var(--bg);
+    opacity: 0;
+    animation: riseIn 0.45s ease 0.05s forwards;
+  }
+  .partner-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .partner-icon svg { width: 20px; height: 20px; color: #fff; }
+  .partner-name { font-weight: 700; font-size: 0.92rem; margin: 0 0 0.15rem; }
+  .partner-meta { font-size: 0.78rem; color: var(--ink-soft); display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
+  .partner-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+  .partner-detail { font-size: 0.82rem; color: var(--ink); }
+
+  .feedback-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 0.75rem; flex-wrap: wrap;
+    margin-top: 1.1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--line);
+  }
+  .feedback-btn {
+    border: 1px solid var(--leaf);
+    background: transparent;
+    color: var(--leaf-deep);
+    padding: 0.5rem 0.85rem;
+    border-radius: 8px;
+    font-family: "Inter", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .feedback-btn:hover { background: var(--leaf); color: #fff; }
+  .feedback-btn svg { width: 14px; height: 14px; }
+  .feedback-count { font-size: 0.78rem; color: var(--ink-soft); }
+
+  .toast {
+    position: fixed;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--soil);
+    color: #fff;
+    padding: 0.7rem 1.1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 50;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .weather-strip {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 0.9rem 1.3rem;
+  }
+  .weather-icon { font-size: 1.5rem; line-height: 1; flex-shrink: 0; }
+  .weather-text { font-size: 0.85rem; font-weight: 600; }
+  .weather-sub { font-size: 0.76rem; color: var(--ink-soft); }
+  .weather-strip.warn { border-color: var(--harvest); background: rgba(217,127,46,0.08); }
+
+  .price-chart-block { margin: 1.1rem 0 1.3rem; }
+  .price-chart-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; }
+  .price-chart-title { font-size: 0.82rem; font-weight: 600; color: var(--ink-soft); }
+  .price-chart-now { font-size: 0.82rem; font-weight: 700; }
+  .price-chart-block svg { width: 100%; height: 52px; display: block; }
+
+  .returns-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin-bottom: 1.3rem; }
+  @media (max-width: 500px) { .returns-grid { grid-template-columns: repeat(2, 1fr); } }
+  .return-cell {
+    border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.7rem;
+    background: var(--bg);
+  }
+  .return-cell.winner { border-color: var(--harvest); background: rgba(217,127,46,0.08); }
+  .return-cell-label { font-size: 0.72rem; color: var(--ink-soft); font-weight: 600; margin-bottom: 0.15rem; }
+  .return-cell-val { font-size: 0.98rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .returns-note { font-size: 0.74rem; color: var(--ink-soft); margin: -0.7rem 0 1.2rem; }
+
+  .share-btn {
+    border: 1px solid #25D366; background: transparent; color: #1c8a4b;
+    padding: 0.5rem 0.85rem; border-radius: 8px; font-family: "Inter", sans-serif;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .share-btn:hover { background: #25D366; color: #fff; }
+  .share-btn svg { width: 14px; height: 14px; }
+
+  footer { margin-top: 2rem; text-align: center; color: var(--ink-soft); font-size: 0.78rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div>
+        <h1 id="pageTitle">AgriValue AI</h1>
+        <div class="tagline" id="pageTag">Live recommendation demo — SIH26193</div>
+      </div>
+    </div>
+    <div class="header-controls">
+      <button class="reset-btn" id="resetBtn" onclick="resetAll()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+        <span id="resetLabel">Reset</span>
+      </button>
+      <div class="lang-toggle">
+        <button id="btnEN" class="active" onclick="setLang('en')">EN</button>
+        <button id="btnTA" onclick="setLang('ta')">தமிழ்</button>
+      </div>
+      <button class="mic-btn" id="micBtn" onclick="startVoiceDemo()" title="Voice input (demo)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="weather-strip" id="weatherStrip">
+      <div class="weather-icon" id="weatherIcon">☀️</div>
+      <div>
+        <div class="weather-text" id="weatherText">Weather: Sunny</div>
+        <div class="weather-sub" id="weatherSub">Good conditions for open-air drying</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="photo-block">
+        <label id="lblPhoto">Scan produce photo (AI quality grading)</label>
+        <div class="photo-dropzone" id="photoDrop" onclick="document.getElementById('photoInput').click()">
+          <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+          <div class="photo-icon-default" id="photoIconDefault">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          </div>
+          <img class="photo-thumb" id="photoThumb">
+          <div>
+            <div class="photo-text-main" id="photoTextMain">Tap to upload a produce photo</div>
+            <div class="photo-text-sub" id="photoTextSub">CV model grades quality automatically</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="presets" id="presetRow"></div>
+      <div class="hint" id="presetHint">Tap a crop to try a real scenario, or set values manually below</div>
+
+      <div class="grid2">
+        <div class="field">
+          <label id="lblQuality">Quality grade</label>
+          <select id="quality" onchange="onManualChange()">
+            <option value="A">A — Premium</option>
+            <option value="B" selected>B — Standard</option>
+            <option value="C">C — Low grade</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="lblTrend">Market trend</label>
+          <select id="trend" onchange="onManualChange()">
+            <option value="rising">Rising</option>
+            <option value="stable" selected>Stable</option>
+            <option value="falling">Falling</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="price-chart-block">
+        <div class="price-chart-head">
+          <span class="price-chart-title" id="priceChartTitle">Mandi price trend (last 7 days, illustrative)</span>
+          <span class="price-chart-now" id="priceChartNow">₹—/kg</span>
+        </div>
+        <svg id="priceChartSvg" viewBox="0 0 280 52" preserveAspectRatio="none"></svg>
+      </div>
+
+      <div class="field">
+        <label id="lblShelf">Shelf life remaining (days): <span class="range-val" id="shelfVal">6</span></label>
+        <input type="range" id="shelf" min="1" max="30" value="6" oninput="onManualChange()">
+      </div>
+
+      <div class="field">
+        <label id="lblQty">Quantity (kg): <span class="range-val" id="qtyVal">300</span></label>
+        <input type="range" id="qty" min="10" max="2000" step="10" value="300" oninput="onManualChange()">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="result-top">
+        <div class="result-icon-wrap" id="resultIconWrap"></div>
+        <div style="flex:1;">
+          <div id="resultAction" class="result-action" aria-live="polite">—</div>
+          <div class="confidence-badge" id="confidenceBadge"><span class="dot"></span><span id="confidenceText">— confidence</span></div>
+        </div>
+      </div>
+      <div id="resultSub" class="result-sub">Adjust the inputs to see a recommendation</div>
+
+      <div class="returns-grid" id="returnsGrid"></div>
+      <div class="returns-note" id="returnsNote">Estimated net return per option, based on typical mandi prices — illustrative only</div>
+
+      <div class="bars" id="bars"></div>
+
+      <div>
+        <label id="lblWhy" style="margin-bottom:0.6rem;">Why this recommendation</label>
+        <ul class="reasons" id="reasons"></ul>
+      </div>
+
+      <div id="partnerCard"></div>
+
+      <div class="feedback-row">
+        <button class="feedback-btn" id="feedbackBtn" onclick="logOutcome()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85.99 6.57 2.6"></path><polyline points="21 3 21 9 15 9"></polyline></svg>
+          <span id="feedbackLabel">Log this outcome</span>
+        </button>
+        <button class="copy-btn" id="copyBtn" onclick="copySummary()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <span id="copyLabel">Copy summary</span>
+        </button>
+        <button class="share-btn" id="shareBtn" onclick="shareWhatsApp()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.2-1.4-.8-.7-1.4-1.6-1.5-1.9-.2-.3 0-.4.1-.6l.4-.5c.1-.1.2-.3.2-.4.1-.2 0-.3 0-.4-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.3-.8.8-.8 1.9s.8 2.2.9 2.4c.1.2 1.6 2.5 4 3.5.6.2 1 .4 1.3.5.6.2 1.1.1 1.5.1.5-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1 0-.1-.2-.2-.4-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>
+          <span id="shareLabel">Share on WhatsApp</span>
+        </button>
+        <span class="feedback-count" id="feedbackCount"></span>
+      </div>
+    </div>
+
+    <div class="accuracy-strip">
+      <div class="accuracy-label" id="accuracyLabel">Model accuracy</div>
+      <div class="accuracy-track"><div class="accuracy-fill" id="accuracyFill" style="width:84%"></div></div>
+      <div class="accuracy-val" id="accuracyVal">84.2%</div>
+      <div class="accuracy-note" id="accuracyNote">Improves each season as more outcomes are logged across the farmer network</div>
+    </div>
+  </div>
+
+  <footer id="footerNote">Rule-based prototype for demo purposes — production version uses trained ML models on live mandi &amp; quality data.</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STR = {
+  en: {
+    title: "AgriValue AI",
+    tag: "Live recommendation demo — SIH26193",
+    quality: "Quality grade",
+    trend: "Market trend",
+    shelf: "Shelf life remaining (days):",
+    qty: "Quantity (kg):",
+    why: "Why this recommendation",
+    reset: "Reset",
+    presetHint: "Tap a crop to try a real scenario, or set values manually below",
+    footer: "Rule-based prototype for demo purposes — production version uses trained ML models on live mandi & quality data.",
+    matchedPartner: "Matched partner",
+    logOutcome: "Log this outcome",
+    outcomeLogged: "Outcome logged — model will retrain with this data next season",
+    feedbackCount: (n) => n === 1 ? "1 outcome logged this session" : n + " outcomes logged this session",
+    confidence: "confidence",
+    photoLabel: "Scan produce photo (AI quality grading)",
+    photoDefaultMain: "Tap to upload a produce photo",
+    photoDefaultSub: "CV model grades quality automatically",
+    photoAnalyzing: "Analyzing produce photo…",
+    photoDetected: (grade, conf) => `Detected: Grade ${grade} · ${conf}% confidence`,
+    copyLabel: "Copy summary",
+    copied: "Recommendation copied to clipboard",
+    accuracyLabel: "Model accuracy",
+    accuracyNote: "Improves each season as more outcomes are logged across the farmer network",
+    micHeard: (crop, q) => `🎤 Heard: "${crop}, grade ${q}"`,
+    summaryText: (action, partnerName, distance, pct, quality, shelf, qty, trend, revenue) =>
+      `AgriValue AI recommendation: ${action}\nEstimated net return: ₹${revenue}\nMatched partner: ${partnerName} (${distance})\nConfidence: ${pct}%\nInputs — Quality: ${quality}, Shelf life: ${shelf} days, Quantity: ${qty} kg, Market trend: ${trend}`,
+    priceChartTitle: "Mandi price trend (last 7 days, illustrative)",
+    returnsNote: "Estimated net return per option, based on typical mandi prices — illustrative only",
+    shareLabel: "Share on WhatsApp",
+    weather: {
+      sunny: { text: "Weather: Sunny", sub: "Good conditions for open-air drying" },
+      cloudy: { text: "Weather: Partly cloudy", sub: "Drying will take a little longer than usual" },
+      rain: { text: "Weather: Rain expected (next 2 days)", sub: "Risky for open-air drying — cover produce or delay" },
+    },
+    dryRainWarning: "Rain expected in the next 2 days — open-air drying is risky, use covered/solar drying",
+    actions: { SELL: "Sell now", STORE: "Store", DRY: "Dry", PROCESS: "Process" },
+    subs: {
+      SELL: "Move produce to market while value is highest",
+      STORE: "Hold in cold storage and wait for a better price window",
+      DRY: "Convert to dried form to extend shelf life and add value",
+      PROCESS: "Route to value-added processing (pulp, powder, etc.)",
+    },
+  },
+  ta: {
+    title: "அக்ரிவேல்யூ AI",
+    tag: "நேரடி பரிந்துரை டெமோ — SIH26193",
+    quality: "தர வகை",
+    trend: "சந்தை போக்கு",
+    shelf: "எஞ்சிய சேமிப்பு நாட்கள்:",
+    qty: "அளவு (கிலோ):",
+    why: "இந்த பரிந்துரைக்கான காரணம்",
+    reset: "மீட்டமை",
+    presetHint: "ஒரு பயிரைத் தேர்ந்தெடுக்கவும் அல்லது கீழே மதிப்புகளை மாற்றவும்",
+    footer: "இது டெமோவுக்கான rule-based prototype — உண்மையான தயாரிப்பு live சந்தை மற்றும் தர தரவுகளில் பயிற்சி பெற்ற ML மாடல்களை பயன்படுத்தும்.",
+    matchedPartner: "பொருத்தமான பங்குதாரர்",
+    logOutcome: "இந்த முடிவை பதிவு செய்",
+    outcomeLogged: "முடிவு பதிவு செய்யப்பட்டது — அடுத்த சீசனில் மாடல் இதை கொண்டு மீண்டும் பயிற்சி பெறும்",
+    feedbackCount: (n) => n === 1 ? "இந்த அமர்வில் 1 முடிவு பதிவு செய்யப்பட்டது" : "இந்த அமர்வில் " + n + " முடிவுகள் பதிவு செய்யப்பட்டன",
+    confidence: "நம்பகத்தன்மை",
+    photoLabel: "பயிர் புகைப்படத்தை ஸ்கேன் செய் (AI தர மதிப்பீடு)",
+    photoDefaultMain: "பயிர் புகைப்படத்தை பதிவேற்ற தட்டவும்",
+    photoDefaultSub: "CV மாடல் தானாகவே தரத்தை மதிப்பிடும்",
+    photoAnalyzing: "புகைப்படத்தை பகுப்பாய்வு செய்கிறது…",
+    photoDetected: (grade, conf) => `கண்டறியப்பட்டது: தரம் ${grade} · ${conf}% நம்பகத்தன்மை`,
+    copyLabel: "சுருக்கத்தை நகலெடு",
+    copied: "பரிந்துரை கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது",
+    accuracyLabel: "மாடல் துல்லியம்",
+    accuracyNote: "விவசாயி நெட்வொர்க்கில் அதிக முடிவுகள் பதிவாகும் போது ஒவ்வொரு சீசனிலும் மேம்படும்",
+    micHeard: (crop, q) => `🎤 கேட்டது: "${crop}, தரம் ${q}"`,
+    summaryText: (action, partnerName, distance, pct, quality, shelf, qty, trend, revenue) =>
+      `அக்ரிவேல்யூ AI பரிந்துரை: ${action}\nமதிப்பிடப்பட்ட லாபம்: ₹${revenue}\nபொருத்தமான பங்குதாரர்: ${partnerName} (${distance})\nநம்பகத்தன்மை: ${pct}%\nஉள்ளீடுகள் — தரம்: ${quality}, சேமிப்பு காலம்: ${shelf} நாட்கள், அளவு: ${qty} கிலோ, சந்தை போக்கு: ${trend}`,
+    priceChartTitle: "மண்டி விலை போக்கு (கடந்த 7 நாட்கள், மாதிரி)",
+    returnsNote: "ஒவ்வொரு விருப்பத்திற்கான மதிப்பிடப்பட்ட லாபம், வழக்கமான மண்டி விலைகளின் அடிப்படையில் — மாதிரிக்காக மட்டும்",
+    shareLabel: "வாட்ஸ்அப்பில் பகிர்",
+    weather: {
+      sunny: { text: "வானிலை: வெயில்", sub: "திறந்தவெளி உலர்த்துதலுக்கு நல்ல நிலைமை" },
+      cloudy: { text: "வானிலை: ஓரளவு மேகமூட்டம்", sub: "உலர்த்த வழக்கத்தை விட கொஞ்சம் நேரம் ஆகும்" },
+      rain: { text: "வானிலை: மழை எதிர்பார்க்கப்படுகிறது (அடுத்த 2 நாட்கள்)", sub: "திறந்தவெளி உலர்த்துதலுக்கு ஆபத்து — மூடி வையுங்கள் அல்லது தாமதிக்கவும்" },
+    },
+    dryRainWarning: "அடுத்த 2 நாட்களில் மழை எதிர்பார்க்கப்படுகிறது — திறந்தவெளி உலர்த்துதல் ஆபத்தானது, மூடிய/சோலார் உலர்த்தியைப் பயன்படுத்தவும்",
+    actions: { SELL: "இப்போதே விற்க", STORE: "சேமித்து வை", DRY: "உலர்த்து", PROCESS: "பதப்படுத்து" },
+    subs: {
+      SELL: "மதிப்பு அதிகமாக இருக்கும்போதே சந்தைக்கு அனுப்பவும்",
+      STORE: "கோல்ட் ஸ்டோரேஜில் வைத்து சிறந்த விலைக்காக காத்திருக்கவும்",
+      DRY: "சேமிப்பு காலத்தை நீட்டிக்க உலர்ந்த வடிவமாக மாற்றவும்",
+      PROCESS: "மதிப்புக் கூட்டும் பதப்படுத்தலுக்கு (பல்ப், பொடி) அனுப்பவும்",
+    },
+  },
+};
+
+const CROPS = [
+  { key: "tomato", en: "Tomato", ta: "தக்காளி", quality: "B", shelf: 4, trend: "stable", qty: 400, basePrice: 18 },
+  { key: "onion", en: "Onion", ta: "வெங்காயம்", quality: "B", shelf: 12, trend: "falling", qty: 800, basePrice: 22 },
+  { key: "mango", en: "Mango", ta: "மாம்பழம்", quality: "A", shelf: 5, trend: "rising", qty: 250, basePrice: 45 },
+  { key: "wheat", en: "Wheat", ta: "கோதுமை", quality: "A", shelf: 25, trend: "stable", qty: 1200, basePrice: 24 },
+  { key: "chilli", en: "Chilli", ta: "மிளகாய்", quality: "C", shelf: 8, trend: "stable", qty: 150, basePrice: 85 },
+];
+const DEFAULT_PRICE = 25;
+
+// Simulated nearby partner network — mirrors the "real-time capacity matching" pitch
+const PARTNERS = {
+  SELL: [
+    { en: "Koyambedu Wholesale Market", ta: "கோயம்பேடு மொத்த சந்தை", distance: "3.2 km",
+      detail_en: "Live price match — next auction slot in 2 hrs", detail_ta: "நேரடி விலை பொருத்தம் — அடுத்த ஏல நேரம் 2 மணி நேரத்தில்" },
+    { en: "Uzhavar Sandhai, Ward 12", ta: "உழவர் சந்தை, வார்டு 12", distance: "1.8 km",
+      detail_en: "Direct farmer stall — no commission", detail_ta: "நேரடி விவசாயி கடை — கமிஷன் இல்லை" },
+    { en: "AgroFresh Buyers Collective", ta: "அக்ரோஃப்ரெஷ் வாங்குனர் கூட்டமைப்பு", distance: "5.6 km",
+      detail_en: "Bulk buyer, pickup within 6 hrs", detail_ta: "மொத்த வாங்குனர், 6 மணி நேரத்தில் எடுத்துச் செல்வார்" },
+  ],
+  STORE: [
+    { en: "FPO Cold Storage Unit 4", ta: "FPO கோல்ட் ஸ்டோரேஜ் யூனிட் 4", distance: "2.1 km",
+      detail_en: "480 MT capacity, 62% free this week", detail_ta: "480 MT கொள்ளளவு, இந்த வாரம் 62% காலியாக உள்ளது" },
+    { en: "Krishi Vigyan Kendra Warehouse", ta: "கிருஷி விக்யான் கேந்திரா கிடங்கு", distance: "4.4 km",
+      detail_en: "Subsidised storage for smallholders", detail_ta: "சிறு விவசாயிகளுக்கான மானிய சேமிப்பு" },
+  ],
+  DRY: [
+    { en: "SunDry Solar Facility, Block C", ta: "சன்ட்ரை சோலார் வசதி, பிளாக் C", distance: "3.7 km",
+      detail_en: "Solar dryer, 2-day turnaround", detail_ta: "சோலார் உலர்த்தி, 2 நாள் தேவை" },
+    { en: "Village Drying Yard Co-op", ta: "கிராம உலர்த்தும் முற்றம் கூட்டுறவு", distance: "1.2 km",
+      detail_en: "Community-run, low cost slot available", detail_ta: "சமூக நடத்தும் இடம், குறைந்த செலவு" },
+  ],
+  PROCESS: [
+    { en: "AgriProcess Unit — Pulp & Puree", ta: "அக்ரிபுராசஸ் யூனிட் — பல்ப் & பியூரே", distance: "6.3 km",
+      detail_en: "500 kg/day intake, slot open tomorrow", detail_ta: "நாள் ஒன்றுக்கு 500 கிலோ, நாளை இடம் உள்ளது" },
+    { en: "Rural MicroProcessing Center", ta: "கிராமப்புற மைக்ரோ புராசசிங் மையம்", distance: "2.9 km",
+      detail_en: "Powder/flake conversion, FPO-linked", detail_ta: "பொடி/ஃபிளேக் மாற்றம், FPO இணைப்பு" },
+  ],
+};
+
+const ICONS = {
+  SELL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
+  STORE: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10a5 5 0 0 1 8-4 5 5 0 0 1 9 3 4.5 4.5 0 0 1-1 9H6a4 4 0 0 1-4-4 4 4 0 0 1 3-3.9"></path></svg>',
+  DRY: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line><line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line><line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line></svg>',
+  PROCESS: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"></path><path d="M4 20V10l5 3V10l5 3V6l5 4v10"></path></svg>',
+};
+
+const MAP_PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>';
+
+const COLORS = { SELL: "var(--sell)", STORE: "var(--store)", DRY: "var(--dry)", PROCESS: "var(--process)" };
+
+let lang = "en";
+let activePreset = null;
+let activeCropPrice = DEFAULT_PRICE;
+let feedbackCount = 0;
+let lastWinner = null;
+let lastPct = null;
+let lastRevenue = null;
+let toastTimer = null;
+
+function generateWeather() {
+  const roll = Math.random();
+  const rainProb = Math.round((roll < 0.3 ? 55 + Math.random() * 35 : roll < 0.6 ? 15 + Math.random() * 20 : Math.random() * 12));
+  const key = rainProb >= 50 ? "rain" : rainProb >= 20 ? "cloudy" : "sunny";
+  const icon = key === "rain" ? "🌧️" : key === "cloudy" ? "⛅" : "☀️";
+  return { key, icon, rainProb };
+}
+const weatherToday = generateWeather();
+
+function renderWeather() {
+  const t = STR[lang];
+  const w = weatherToday;
+  document.getElementById("weatherIcon").textContent = w.icon;
+  document.getElementById("weatherText").textContent = t.weather[w.key].text + ` (${w.rainProb}% rain)`;
+  document.getElementById("weatherSub").textContent = t.weather[w.key].sub;
+  document.getElementById("weatherStrip").classList.toggle("warn", w.key === "rain");
+}
+
+function renderPriceChart() {
+  const price = activeCropPrice;
+  const trend = document.getElementById("trend").value;
+  const slope = trend === "rising" ? 1 : trend === "falling" ? -1 : 0;
+  const seed = Math.round(price * 7 + document.getElementById("qty").value / 10);
+  const pts = [];
+  for (let i = 0; i < 7; i++) {
+    const noise = (Math.sin(seed + i * 12.9) * 0.5 + 0.5 - 0.5) * 0.06;
+    const trendFactor = 1 + (slope * i * 0.018) + noise;
+    pts.push(Math.max(price * 0.7, price * trendFactor));
+  }
+  const min = Math.min(...pts), max = Math.max(...pts);
+  const range = Math.max(max - min, 0.01);
+  const w = 280, h = 52, pad = 4;
+  const coords = pts.map((v, i) => {
+    const x = pad + (i / 6) * (w - pad * 2);
+    const y = h - pad - ((v - min) / range) * (h - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const color = slope > 0 ? "var(--leaf)" : slope < 0 ? "var(--sell)" : "var(--dry)";
+  const svg = document.getElementById("priceChartSvg");
+  svg.innerHTML = `<polyline points="${coords.join(" ")}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` +
+    coords.map((c) => `<circle cx="${c.split(",")[0]}" cy="${c.split(",")[1]}" r="2.2" fill="${color}"/>`).join("");
+  document.getElementById("priceChartNow").textContent = `₹${Math.round(pts[6])}/kg`;
+}
+
+function setLang(l) {
+  lang = l;
+  document.getElementById("btnEN").classList.toggle("active", l === "en");
+  document.getElementById("btnTA").classList.toggle("active", l === "ta");
+  const t = STR[l];
+  document.getElementById("pageTitle").textContent = t.title;
+  document.getElementById("pageTag").textContent = t.tag;
+  document.getElementById("lblQuality").textContent = t.quality;
+  document.getElementById("lblTrend").textContent = t.trend;
+  document.getElementById("lblWhy").textContent = t.why;
+  document.getElementById("footerNote").textContent = t.footer;
+  document.getElementById("resetLabel").textContent = t.reset;
+  document.getElementById("presetHint").textContent = t.presetHint;
+  document.getElementById("feedbackLabel").textContent = t.logOutcome;
+  document.getElementById("lblPhoto").textContent = t.photoLabel;
+  document.getElementById("copyLabel").textContent = t.copyLabel;
+  document.getElementById("accuracyLabel").textContent = t.accuracyLabel;
+  document.getElementById("accuracyNote").textContent = t.accuracyNote;
+  document.getElementById("priceChartTitle").textContent = t.priceChartTitle;
+  document.getElementById("returnsNote").textContent = t.returnsNote;
+  document.getElementById("shareLabel").textContent = t.shareLabel;
+  renderWeather();
+  if (!document.getElementById("photoThumb").style.display || document.getElementById("photoThumb").style.display === "none") {
+    document.getElementById("photoTextMain").textContent = t.photoDefaultMain;
+    document.getElementById("photoTextSub").textContent = t.photoDefaultSub;
+  }
+  renderPresets();
+  onInput();
+  updateFeedbackCount();
+}
+
+function renderPresets() {
+  const row = document.getElementById("presetRow");
+  row.innerHTML = "";
+  CROPS.forEach((c) => {
+    const b = document.createElement("button");
+    b.textContent = lang === "en" ? c.en : c.ta;
+    b.className = activePreset === c.key ? "active" : "";
+    b.onclick = () => applyPreset(c);
+    row.appendChild(b);
+  });
+}
+
+function applyPreset(c) {
+  activePreset = c.key;
+  activeCropPrice = c.basePrice;
+  document.getElementById("quality").value = c.quality;
+  document.getElementById("trend").value = c.trend;
+  document.getElementById("shelf").value = c.shelf;
+  document.getElementById("qty").value = c.qty;
+  renderPresets();
+  onInput();
+}
+
+function onManualChange() {
+  activePreset = null;
+  renderPresets();
+  onInput();
+}
+
+function resetAll() {
+  activePreset = null;
+  activeCropPrice = DEFAULT_PRICE;
+  document.getElementById("quality").value = "B";
+  document.getElementById("trend").value = "stable";
+  document.getElementById("shelf").value = 6;
+  document.getElementById("qty").value = 300;
+  document.getElementById("photoInput").value = "";
+  document.getElementById("photoThumb").style.display = "none";
+  document.getElementById("photoIconDefault").style.display = "flex";
+  document.getElementById("photoTextMain").textContent = STR[lang].photoDefaultMain;
+  document.getElementById("photoTextSub").textContent = STR[lang].photoDefaultSub;
+  renderPresets();
+  onInput();
+  showToast(lang === "en" ? "Reset to defaults" : "இயல்புநிலைக்கு மீட்டமைக்கப்பட்டது");
+}
+
+function onInput() {
+  document.getElementById("shelfVal").textContent = document.getElementById("shelf").value;
+  document.getElementById("qtyVal").textContent = document.getElementById("qty").value;
+  document.getElementById("lblShelf").firstChild.textContent = STR[lang].shelf + " ";
+  document.getElementById("lblQty").firstChild.textContent = STR[lang].qty + " ";
+  renderPriceChart();
+  compute();
+}
+
+function pickPartner(action, qty, shelf) {
+  const list = PARTNERS[action];
+  const idx = (qty + shelf) % list.length;
+  return list[idx];
+}
+
+function renderPartnerCard(winner, qty, shelf) {
+  const t = STR[lang];
+  const p = pickPartner(winner, qty, shelf);
+  const wrap = document.getElementById("partnerCard");
+  wrap.innerHTML = `
+    <div class="hint" style="margin:0 0 0.5rem;">${t.matchedPartner}</div>
+    <div class="partner-card" key="${winner}-${qty}-${shelf}">
+      <div class="partner-icon" style="background:${COLORS[winner]}">${ICONS[winner]}</div>
+      <div>
+        <div class="partner-name">${lang === "en" ? p.en : p.ta}</div>
+        <div class="partner-meta"><span>${MAP_PIN.replace('viewBox="0 0 24 24"', 'viewBox="0 0 24 24" width="12" height="12"')} ${p.distance}</span></div>
+        <div class="partner-detail">${lang === "en" ? p.detail_en : p.detail_ta}</div>
+      </div>
+    </div>
+  `;
+}
+
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+}
+
+function updateFeedbackCount() {
+  const el = document.getElementById("feedbackCount");
+  el.textContent = feedbackCount > 0 ? STR[lang].feedbackCount(feedbackCount) : "";
+}
+
+function logOutcome() {
+  feedbackCount += 1;
+  updateFeedbackCount();
+  showToast(STR[lang].outcomeLogged);
+}
+
+const QUALITY_MULT = { A: 1.2, B: 1.0, C: 0.8 };
+const TREND_MULT = { rising: 1.1, stable: 1.0, falling: 0.9 };
+
+function computeRevenue(action, quality, trend, shelf, qty, price) {
+  const qm = QUALITY_MULT[quality];
+  if (action === "SELL") {
+    return Math.round(qty * price * qm * TREND_MULT[trend]);
+  }
+  if (action === "STORE") {
+    const futureMult = trend === "falling" ? 1.15 : trend === "rising" ? 0.95 : 1.05;
+    const storageDays = Math.min(shelf, 15);
+    const storageCost = qty * 0.15 * storageDays;
+    return Math.max(0, Math.round(qty * price * qm * futureMult - storageCost));
+  }
+  if (action === "DRY") {
+    const yieldFactor = 0.15;
+    const driedPrice = price * 4;
+    const dryingCost = qty * 1.5;
+    return Math.max(0, Math.round(qty * yieldFactor * driedPrice * qm - dryingCost));
+  }
+  // PROCESS
+  const processPrice = price * 0.85;
+  const perKgCost = qty >= 500 ? 1.5 : 2;
+  return Math.max(0, Math.round(qty * processPrice * qm - qty * perKgCost));
+}
+
+function renderReturns(scores, quality, trend, shelf, qty) {
+  const t = STR[lang];
+  const grid = document.getElementById("returnsGrid");
+  grid.innerHTML = "";
+  const revenues = {};
+  ["SELL", "STORE", "DRY", "PROCESS"].forEach((k) => {
+    revenues[k] = computeRevenue(k, quality, trend, shelf, qty, activeCropPrice);
+  });
+  const bestKey = Object.keys(revenues).reduce((a, b) => (revenues[a] >= revenues[b] ? a : b));
+  ["SELL", "STORE", "DRY", "PROCESS"].forEach((k) => {
+    const cell = document.createElement("div");
+    cell.className = "return-cell" + (k === bestKey ? " winner" : "");
+    cell.innerHTML = `<div class="return-cell-label">${t.actions[k]}</div><div class="return-cell-val">₹${revenues[k].toLocaleString("en-IN")}</div>`;
+    grid.appendChild(cell);
+  });
+  return revenues;
+}
+
+function compute() {
+  const quality = document.getElementById("quality").value;
+  const trend = document.getElementById("trend").value;
+  const shelf = parseInt(document.getElementById("shelf").value, 10);
+  const qty = parseInt(document.getElementById("qty").value, 10);
+
+  let scores = { SELL: 35, STORE: 25, DRY: 20, PROCESS: 25 };
+  let reasons = { SELL: [], STORE: [], DRY: [], PROCESS: [] };
+
+  // SELL
+  if (shelf <= 3) { scores.SELL += 30; reasons.SELL.push(lang === "en" ? "Very short shelf life — sell before it spoils" : "மிக குறைந்த சேமிப்பு காலம் — கெட்டுப்போகும் முன் விற்கவும்"); }
+  if (trend === "rising") { scores.SELL += 25; reasons.SELL.push(lang === "en" ? "Market price is rising — good time to sell" : "சந்தை விலை உயர்கிறது — விற்க நல்ல நேரம்"); }
+  if (quality === "A") { scores.SELL += 15; reasons.SELL.push(lang === "en" ? "Premium quality commands top price now" : "உயர் தரம் இப்போது சிறந்த விலை பெறும்"); }
+  if (trend === "falling") { scores.SELL -= 15; }
+
+  // STORE
+  if (shelf >= 10) { scores.STORE += 30; reasons.STORE.push(lang === "en" ? "Long shelf life supports safe storage" : "நீண்ட சேமிப்பு காலம் பாதுகாப்பான சேமிப்பை ஆதரிக்கிறது"); }
+  if (trend === "falling") { scores.STORE += 25; reasons.STORE.push(lang === "en" ? "Prices are falling — wait for recovery" : "விலைகள் குறைகின்றன — மீட்சிக்காக காத்திருக்கவும்"); }
+  if (shelf <= 3) { scores.STORE -= 40; }
+
+  // DRY
+  if (quality === "B" || quality === "C") { scores.DRY += 20; reasons.DRY.push(lang === "en" ? "Lower grade suits drying/preservation better than fresh sale" : "குறைந்த தரம் புதிய விற்பனையை விட உலர்த்துவதற்கு ஏற்றது"); }
+  if (shelf >= 4 && shelf <= 10) { scores.DRY += 15; reasons.DRY.push(lang === "en" ? "Shelf-life window fits drying before spoilage" : "கெடுவதற்கு முன் உலர்த்த போதுமான காலம் உள்ளது"); }
+  if (quality === "A" && trend === "rising") { scores.DRY -= 15; }
+  if (weatherToday.key === "rain") { scores.DRY -= 25; reasons.DRY.push(STR[lang].dryRainWarning); }
+
+  // PROCESS
+  if (quality === "B" || quality === "C") { scores.PROCESS += 25; reasons.PROCESS.push(lang === "en" ? "Grade suits processing over fresh retail" : "இந்த தரம் புதிய விற்பனையை விட பதப்படுத்தலுக்கு ஏற்றது"); }
+  if (qty >= 500) { scores.PROCESS += 15; reasons.PROCESS.push(lang === "en" ? "Large quantity makes processing economical" : "அதிக அளவு பதப்படுத்தலை லாபகரமாக்குகிறது"); }
+  if (shelf <= 5) { scores.PROCESS += 15; reasons.PROCESS.push(lang === "en" ? "Short shelf life — processing avoids total loss" : "குறைந்த சேமிப்பு காலம் — பதப்படுத்துதல் இழப்பை தவிர்க்கிறது"); }
+  if (qty < 100) { scores.PROCESS -= 10; }
+
+  Object.keys(scores).forEach((k) => { scores[k] = Math.max(5, Math.min(100, scores[k])); });
+
+  const total = Object.values(scores).reduce((a, b) => a + b, 0);
+  const pct = {};
+  Object.keys(scores).forEach((k) => { pct[k] = Math.round((scores[k] / total) * 100); });
+
+  const winner = Object.keys(scores).reduce((a, b) => (scores[a] >= scores[b] ? a : b));
+
+  const t = STR[lang];
+
+  const resultActionEl = document.getElementById("resultAction");
+  resultActionEl.style.animation = "none";
+  // force reflow so the rise-in animation replays on every recompute
+  void resultActionEl.offsetWidth;
+  resultActionEl.style.animation = "";
+
+  resultActionEl.textContent = t.actions[winner];
+  resultActionEl.style.color = COLORS[winner];
+  document.getElementById("resultSub").textContent = t.subs[winner];
+
+  const iconWrap = document.getElementById("resultIconWrap");
+  iconWrap.style.background = COLORS[winner];
+  iconWrap.style.color = "#fff";
+  iconWrap.innerHTML = ICONS[winner];
+
+  const badge = document.getElementById("confidenceBadge");
+  badge.querySelector(".dot").style.background = COLORS[winner];
+  document.getElementById("confidenceText").textContent = pct[winner] + "% " + t.confidence;
+
+  const barsEl = document.getElementById("bars");
+  barsEl.innerHTML = "";
+  ["SELL", "STORE", "DRY", "PROCESS"].forEach((k) => {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+    row.innerHTML = `
+      <div class="bar-icon" style="color:${COLORS[k]}">${ICONS[k]}</div>
+      <div class="bar-label">${t.actions[k]}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct[k]}%; background:${COLORS[k]}"></div></div>
+      <div class="bar-pct">${pct[k]}%</div>
+    `;
+    barsEl.appendChild(row);
+  });
+
+  const reasonsEl = document.getElementById("reasons");
+  reasonsEl.innerHTML = "";
+  const winReasons = reasons[winner].length ? reasons[winner] : [lang === "en" ? "Balanced conditions — default recommendation" : "சமநிலையான நிலைமைகள் — இயல்புநிலை பரிந்துரை"];
+  winReasons.forEach((r) => {
+    const li = document.createElement("li");
+    li.textContent = r;
+    reasonsEl.appendChild(li);
+  });
+
+  renderPartnerCard(winner, qty, shelf);
+  const revenues = renderReturns(scores, quality, trend, shelf, qty);
+  lastWinner = winner;
+  lastPct = pct[winner];
+  lastRevenue = revenues[winner];
+}
+
+function handlePhotoUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const t = STR[lang];
+  const drop = document.getElementById("photoDrop");
+  const thumb = document.getElementById("photoThumb");
+  const iconDefault = document.getElementById("photoIconDefault");
+  const mainText = document.getElementById("photoTextMain");
+  const subText = document.getElementById("photoTextSub");
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    thumb.src = e.target.result;
+    thumb.style.display = "block";
+    iconDefault.style.display = "none";
+  };
+  reader.readAsDataURL(file);
+
+  drop.classList.add("analyzing");
+  mainText.innerHTML = `<span class="spin"></span>${t.photoAnalyzing}`;
+  subText.textContent = "";
+
+  setTimeout(() => {
+    const grades = ["A", "B", "C"];
+    const grade = grades[Math.floor(Math.random() * grades.length)];
+    const confidence = Math.floor(Math.random() * 13) + 84; // 84–96%
+    drop.classList.remove("analyzing");
+    mainText.textContent = t.photoDetected(grade, confidence);
+    subText.textContent = t.photoDefaultSub;
+    document.getElementById("quality").value = grade;
+    onManualChange();
+  }, 1400);
+}
+
+function startVoiceDemo() {
+  const micBtn = document.getElementById("micBtn");
+  if (micBtn.classList.contains("listening")) return;
+  micBtn.classList.add("listening");
+  setTimeout(() => {
+    micBtn.classList.remove("listening");
+    const c = CROPS[Math.floor(Math.random() * CROPS.length)];
+    applyPreset(c);
+    const t = STR[lang];
+    const cropName = lang === "en" ? c.en : c.ta;
+    showToast(t.micHeard(cropName, c.quality));
+  }, 1600);
+}
+
+function copySummary() {
+  if (!lastWinner) return;
+  const t = STR[lang];
+  const quality = document.getElementById("quality").value;
+  const trend = document.getElementById("trend").value;
+  const shelf = parseInt(document.getElementById("shelf").value, 10);
+  const qty = parseInt(document.getElementById("qty").value, 10);
+  const partner = pickPartner(lastWinner, qty, shelf);
+  const partnerName = lang === "en" ? partner.en : partner.ta;
+  const text = t.summaryText(t.actions[lastWinner], partnerName, partner.distance, lastPct, quality, shelf, qty, trend, lastRevenue.toLocaleString("en-IN"));
+  const done = () => showToast(t.copied);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(done);
+  } else {
+    done();
+  }
+}
+
+function shareWhatsApp() {
+  if (!lastWinner) return;
+  const t = STR[lang];
+  const quality = document.getElementById("quality").value;
+  const trend = document.getElementById("trend").value;
+  const shelf = parseInt(document.getElementById("shelf").value, 10);
+  const qty = parseInt(document.getElementById("qty").value, 10);
+  const partner = pickPartner(lastWinner, qty, shelf);
+  const partnerName = lang === "en" ? partner.en : partner.ta;
+  const text = t.summaryText(t.actions[lastWinner], partnerName, partner.distance, lastPct, quality, shelf, qty, trend, lastRevenue.toLocaleString("en-IN"));
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+}
+
+renderPresets();
+renderWeather();
+onInput();
+updateFeedbackCount();
+</script>
+</body>
+</html>
